@@ -1,5 +1,6 @@
 package yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.otp_verification
 
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_in.SignInEvent
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_up.SignUpEvent
 
 sealed class OTPVerificationEvent {
@@ -10,4 +11,8 @@ sealed class OTPVerificationEvent {
 
     data object ShowInternetIsNotAvailableDialogEvent : OTPVerificationEvent()
     data object HideInternetIsNotAvailableDialogEvent : OTPVerificationEvent()
+
+
+    data object ShowServerIsNotAvailableDialogEvent : OTPVerificationEvent()
+    data object HideServerIsNotAvailableDialogEvent : OTPVerificationEvent()
 }

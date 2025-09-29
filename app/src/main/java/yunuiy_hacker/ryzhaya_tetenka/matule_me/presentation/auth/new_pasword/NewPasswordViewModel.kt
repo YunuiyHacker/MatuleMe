@@ -14,17 +14,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.R
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.change_password.ChangePasswordUseCase
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.change_password.CheckingOTPCodeAccuracyUseCase
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.use_case.CheckingEmailForRegistrationOperator
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_up.SignUpEvent
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.use_case.CheckingServerAvailableUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.Constants.SUCCESS_DIALOG_SHOW_TIME_IN_SECONDS
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.InternetUtils
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.NetworkUtils
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class NewPasswordViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val checkingServerAvailableUseCase: CheckingServerAvailableUseCase,
     private val changePasswordUseCase: ChangePasswordUseCase,
 ) : ViewModel() {
     val state by mutableStateOf(NewPasswordState())
@@ -65,6 +64,14 @@ class NewPasswordViewModel @Inject constructor(
                 state.contentState.internetIsAvailable.value = true
             }
 
+            is NewPasswordEvent.ShowServerIsNotAvailableDialogEvent -> {
+                state.contentState.serverIsAvailable.value = false
+            }
+
+            is NewPasswordEvent.HideServerIsNotAvailableDialogEvent -> {
+                state.contentState.serverIsAvailable.value = true
+            }
+
             is NewPasswordEvent.OnClickButtonEvent -> changePassword()
         }
     }
@@ -79,9 +86,12 @@ class NewPasswordViewModel @Inject constructor(
                     validate()
 
                     state.contentState.internetIsAvailable.value =
-                        InternetUtils.isInternetAvailable(context)
+                        NetworkUtils.isInternetAvailable(context)
 
-                    if (state.contentState.internetIsAvailable.value) {
+                    state.contentState.serverIsAvailable.value =
+                        checkingServerAvailableUseCase.execute()
+
+                    if (state.contentState.internetIsAvailable.value && state.contentState.serverIsAvailable.value) {
                         if (state.passwordIsValid && state.passwordConfirmationIsValid && state.password == state.passwordConfirmation) {
                             val user = changePasswordUseCase.execute(
                                 email = state.email, newPassword = state.password

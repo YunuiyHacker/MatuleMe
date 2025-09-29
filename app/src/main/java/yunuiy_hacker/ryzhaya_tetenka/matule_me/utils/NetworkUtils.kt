@@ -8,7 +8,7 @@ import android.net.ConnectivityManager.TYPE_WIFI
 import android.net.NetworkCapabilities
 import android.os.Build
 
-object InternetUtils {
+object NetworkUtils {
     fun isInternetAvailable(context: Context): Boolean {
         var result = false
         val connectivityManager =

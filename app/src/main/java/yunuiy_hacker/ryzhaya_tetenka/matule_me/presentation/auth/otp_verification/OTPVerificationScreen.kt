@@ -48,8 +48,10 @@ import yunuiy_hacker.ryzhaya_tetenka.matule_me.nav_graph.Route
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.LoadingDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.forgot_password.composable.CheckYourEmailDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.otp_verification.composable.OTPCodeTextFieldItem
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_in.SignInEvent
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_up.SignUpEvent
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.InternetIsNotAvailableDialog
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.ServerIsNotAvailableDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.SuccessDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.BlockBackgroundColor
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.MatuleMeTheme
@@ -271,6 +273,12 @@ fun OTPVerificationScreen(
             if (!state.contentState.internetIsAvailable.value) {
                 InternetIsNotAvailableDialog(onDismissRequest = {
                     viewModel.onEvent(OTPVerificationEvent.HideInternetIsNotAvailableDialogEvent)
+                })
+            }
+
+            if (!state.contentState.serverIsAvailable.value) {
+                ServerIsNotAvailableDialog(onDismissRequest = {
+                    viewModel.onEvent(OTPVerificationEvent.HideServerIsNotAvailableDialogEvent)
                 })
             }
 

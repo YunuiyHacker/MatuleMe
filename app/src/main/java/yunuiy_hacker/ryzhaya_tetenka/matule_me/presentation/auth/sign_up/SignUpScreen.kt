@@ -54,6 +54,7 @@ import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.di
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.MessageDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.TextField
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.InternetIsNotAvailableDialog
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.ServerIsNotAvailableDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.SuccessDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.BlockBackgroundColor
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.HintColor
@@ -63,7 +64,8 @@ import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.raleway
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
-    navHostController: NavHostController, viewModel: SignUpViewModel = hiltViewModel<SignUpViewModel>()
+    navHostController: NavHostController,
+    viewModel: SignUpViewModel = hiltViewModel<SignUpViewModel>()
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -285,6 +287,12 @@ fun SignUpScreen(
         if (!state.contentState.internetIsAvailable.value) {
             InternetIsNotAvailableDialog(onDismissRequest = {
                 viewModel.onEvent(SignUpEvent.HideInternetIsNotAvailableDialogEvent)
+            })
+        }
+
+        if (!state.contentState.serverIsAvailable.value) {
+            ServerIsNotAvailableDialog(onDismissRequest = {
+                viewModel.onEvent(SignUpEvent.HideServerIsNotAvailableDialogEvent)
             })
         }
 

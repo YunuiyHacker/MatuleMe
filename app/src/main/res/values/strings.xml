@@ -82,5 +82,6 @@
     <string name="change">Сменить</string>
     <string name="profile">Профиль</string>
     <string name="there_is_no_internet_connection">Отсутствует интернет-соединение</string>
+    <string name="there_is_no_server_connection">Отсутствует соединение с сервером</string>
     <string name="could_not_set_a_new_password_for_user">Не удалось установить новый пароль для пользователя</string>
 </resources>

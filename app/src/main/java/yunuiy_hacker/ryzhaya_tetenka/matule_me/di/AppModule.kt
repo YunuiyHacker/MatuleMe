@@ -20,6 +20,7 @@ import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.change_password.ChangePass
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.change_password.CheckingOTPCodeAccuracyUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.change_password.ResendOTPCodeUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.use_case.CheckingEmailForRegistrationOperator
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.use_case.CheckingServerAvailableUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.forgot_password.SendRequestForTakeOTPCodeUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.sign_in.SignInUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.sign_up.CreateNewUserOperator
@@ -45,6 +46,11 @@ object AppModule {
         install(Auth)
         install(Postgrest)
     }
+
+    @Provides
+    @Singleton
+    fun provideCheckingServerAvailableUseCase(supabaseClient: SupabaseClient): CheckingServerAvailableUseCase =
+        CheckingServerAvailableUseCase(supabaseClient)
 
     @Provides
     @Singleton

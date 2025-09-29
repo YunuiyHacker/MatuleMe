@@ -50,6 +50,7 @@ import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.di
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.MessageDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.TextField
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.InternetIsNotAvailableDialog
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.ServerIsNotAvailableDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.SuccessDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.BlockBackgroundColor
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.HintColor
@@ -253,6 +254,12 @@ fun SignInScreen(
         if (!state.contentState.internetIsAvailable.value) {
             InternetIsNotAvailableDialog(onDismissRequest = {
                 viewModel.onEvent(SignInEvent.HideInternetIsNotAvailableDialogEvent)
+            })
+        }
+
+        if (!state.contentState.serverIsAvailable.value) {
+            ServerIsNotAvailableDialog(onDismissRequest = {
+                viewModel.onEvent(SignInEvent.HideServerIsNotAvailableDialogEvent)
             })
         }
 

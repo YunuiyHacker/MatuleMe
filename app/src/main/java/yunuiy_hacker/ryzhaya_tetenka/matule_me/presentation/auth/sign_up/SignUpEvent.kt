@@ -15,5 +15,8 @@ sealed class SignUpEvent {
     data object ShowInternetIsNotAvailableDialogEvent : SignUpEvent()
     data object HideInternetIsNotAvailableDialogEvent : SignUpEvent()
 
+    data object ShowServerIsNotAvailableDialogEvent : SignUpEvent()
+    data object HideServerIsNotAvailableDialogEvent : SignUpEvent()
+
     data object OnClickButtonEvent : SignUpEvent()
 }

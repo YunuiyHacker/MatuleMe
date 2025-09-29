@@ -16,9 +16,10 @@ import yunuiy_hacker.ryzhaya_tetenka.matule_me.R
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.data.common.model.User
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.data.local.shared_prefs.SharedPrefsHelper
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.mappers.toDomain
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.use_case.CheckingServerAvailableUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.sign_in.SignInUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.Constants.SUCCESS_DIALOG_SHOW_TIME_IN_SECONDS
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.InternetUtils
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.NetworkUtils
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.RegexPatterns.PATTERN_EMAIL
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -26,6 +27,7 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val checkingServerAvailableUseCase: CheckingServerAvailableUseCase,
     private val signInUseCase: SignInUseCase,
     private val sharedPrefsHelper: SharedPrefsHelper
 ) : ViewModel() {
@@ -63,6 +65,14 @@ class SignInViewModel @Inject constructor(
                 state.contentState.internetIsAvailable.value = true
             }
 
+            is SignInEvent.ShowServerIsNotAvailableDialogEvent -> {
+                state.contentState.serverIsAvailable.value = false
+            }
+
+            is SignInEvent.HideServerIsNotAvailableDialogEvent -> {
+                state.contentState.serverIsAvailable.value = true
+            }
+
             is SignInEvent.OnClickButtonEvent -> signIn()
         }
     }
@@ -77,9 +87,12 @@ class SignInViewModel @Inject constructor(
                     validate()
 
                     state.contentState.internetIsAvailable.value =
-                        InternetUtils.isInternetAvailable(context)
+                        NetworkUtils.isInternetAvailable(context)
 
-                    if (state.contentState.internetIsAvailable.value) {
+                    state.contentState.serverIsAvailable.value =
+                        checkingServerAvailableUseCase.execute()
+
+                    if (state.contentState.internetIsAvailable.value && state.contentState.serverIsAvailable.value) {
                         if (state.emailIsValid && state.passwordIsValid) {
                             val user = signInUseCase.execute(
                                 User(

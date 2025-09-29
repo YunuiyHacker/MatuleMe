@@ -15,10 +15,10 @@ import kotlinx.coroutines.runBlocking
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.R
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.data.common.model.User
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.data.local.shared_prefs.SharedPrefsHelper
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.use_case.CheckingServerAvailableUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.sign_up.SignUpUseCase
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_in.SignInEvent
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.Constants.SUCCESS_DIALOG_SHOW_TIME_IN_SECONDS
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.InternetUtils
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.NetworkUtils
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.RegexPatterns.PATTERN_EMAIL
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -26,6 +26,7 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val checkingServerAvailableUseCase: CheckingServerAvailableUseCase,
     private val signUpUseCase: SignUpUseCase,
     private val sharedPrefsHelper: SharedPrefsHelper
 ) : ViewModel() {
@@ -71,6 +72,14 @@ class SignUpViewModel @Inject constructor(
                 state.contentState.internetIsAvailable.value = true
             }
 
+            is SignUpEvent.ShowServerIsNotAvailableDialogEvent -> {
+                state.contentState.serverIsAvailable.value = false
+            }
+
+            is SignUpEvent.HideServerIsNotAvailableDialogEvent -> {
+                state.contentState.serverIsAvailable.value = true
+            }
+
             is SignUpEvent.OnClickButtonEvent -> signUp()
         }
     }
@@ -85,9 +94,12 @@ class SignUpViewModel @Inject constructor(
                     validate()
 
                     state.contentState.internetIsAvailable.value =
-                        InternetUtils.isInternetAvailable(context)
+                        NetworkUtils.isInternetAvailable(context)
 
-                    if (state.contentState.internetIsAvailable.value) {
+                    state.contentState.serverIsAvailable.value =
+                        checkingServerAvailableUseCase.execute()
+
+                    if (state.contentState.internetIsAvailable.value && state.contentState.serverIsAvailable.value) {
                         if (state.nameIsValid && state.emailIsValid && state.passwordIsValid && state.privacyPolicyIsConfirmed) {
                             if (signUpUseCase.checkingEmailForRegistrationOperator(state.email)) {
                                 state.message =

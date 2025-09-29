@@ -42,9 +42,11 @@ import yunuiy_hacker.ryzhaya_tetenka.matule_me.nav_graph.Route
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.LoadingDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.TextField
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.forgot_password.composable.CheckYourEmailDialog
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_in.SignInEvent
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_up.SignUpEvent
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.InternetIsNotAvailableDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.MessageDialog
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.ServerIsNotAvailableDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.BlockBackgroundColor
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.MatuleMeTheme
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.raleway
@@ -148,6 +150,12 @@ fun ForgotPasswordScreen(
             if (!state.contentState.internetIsAvailable.value) {
                 InternetIsNotAvailableDialog(onDismissRequest = {
                     viewModel.onEvent(ForgotPasswordEvent.HideInternetIsNotAvailableDialogEvent)
+                })
+            }
+
+            if (!state.contentState.serverIsAvailable.value) {
+                ServerIsNotAvailableDialog(onDismissRequest = {
+                    viewModel.onEvent(ForgotPasswordEvent.HideServerIsNotAvailableDialogEvent)
                 })
             }
 

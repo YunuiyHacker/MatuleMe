@@ -12,20 +12,20 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.R
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.change_password.CheckingOTPCodeAccuracyUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.change_password.ResendOTPCodeUseCase
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.use_case.CheckingServerAvailableUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.forgot_password.SendRequestForTakeOTPCodeUseCase
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_up.SignUpEvent
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.Constants.OTP_CODE_RESEND_TIME_IN_SECONDS
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.Constants.SUCCESS_DIALOG_SHOW_TIME_IN_SECONDS
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.InternetUtils
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.NetworkUtils
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class OTPVerificationViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val checkingServerAvailableUseCase: CheckingServerAvailableUseCase,
     private val sendRequestForTakeOTPCodeUseCase: SendRequestForTakeOTPCodeUseCase,
     private val resendOTPCodeUseCase: ResendOTPCodeUseCase,
     private val checkingOTPCodeAccuracyUseCase: CheckingOTPCodeAccuracyUseCase
@@ -46,6 +46,14 @@ class OTPVerificationViewModel @Inject constructor(
 
             is OTPVerificationEvent.HideInternetIsNotAvailableDialogEvent -> {
                 state.contentState.internetIsAvailable.value = true
+            }
+
+            is OTPVerificationEvent.ShowServerIsNotAvailableDialogEvent -> {
+                state.contentState.serverIsAvailable.value = false
+            }
+
+            is OTPVerificationEvent.HideServerIsNotAvailableDialogEvent -> {
+                state.contentState.serverIsAvailable.value = true
             }
         }
     }
@@ -83,9 +91,12 @@ class OTPVerificationViewModel @Inject constructor(
                 try {
 
                     state.contentState.internetIsAvailable.value =
-                        InternetUtils.isInternetAvailable(context)
+                        NetworkUtils.isInternetAvailable(context)
 
-                    if (state.contentState.internetIsAvailable.value) {
+                    state.contentState.serverIsAvailable.value =
+                        checkingServerAvailableUseCase.execute()
+
+                    if (state.contentState.internetIsAvailable.value && state.contentState.serverIsAvailable.value) {
                         sendRequestForTakeOTPCodeUseCase.execute(state.email)
                     }
 
@@ -108,9 +119,12 @@ class OTPVerificationViewModel @Inject constructor(
             runBlocking {
                 try {
                     state.contentState.internetIsAvailable.value =
-                        InternetUtils.isInternetAvailable(context)
+                        NetworkUtils.isInternetAvailable(context)
 
-                    if (state.contentState.internetIsAvailable.value) {
+                    state.contentState.serverIsAvailable.value =
+                        checkingServerAvailableUseCase.execute()
+
+                    if (state.contentState.internetIsAvailable.value && state.contentState.serverIsAvailable.value) {
                         val checkingResult = checkingOTPCodeAccuracyUseCase.execute(
                             email = state.email, token = code
                         )

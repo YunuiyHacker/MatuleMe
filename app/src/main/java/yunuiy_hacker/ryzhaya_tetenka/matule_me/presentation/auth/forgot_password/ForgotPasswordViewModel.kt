@@ -13,15 +13,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.R
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.use_case.CheckingEmailForRegistrationOperator
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.use_case.CheckingServerAvailableUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.forgot_password.SendRequestForTakeOTPCodeUseCase
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_up.SignUpEvent
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.InternetUtils
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.NetworkUtils
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.RegexPatterns
 import javax.inject.Inject
 
 @HiltViewModel
 class ForgotPasswordViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val checkingServerAvailableUseCase: CheckingServerAvailableUseCase,
     private val checkingEmailForRegistrationOperator: CheckingEmailForRegistrationOperator,
     private val sendRequestForTakeOTPCodeUseCase: SendRequestForTakeOTPCodeUseCase
 ) :
@@ -61,6 +62,14 @@ class ForgotPasswordViewModel @Inject constructor(
                 state.contentState.internetIsAvailable.value = true
             }
 
+            is ForgotPasswordEvent.ShowServerIsNotAvailableDialogEvent -> {
+                state.contentState.serverIsAvailable.value = false
+            }
+
+            is ForgotPasswordEvent.HideServerIsNotAvailableDialogEvent -> {
+                state.contentState.serverIsAvailable.value = true
+            }
+
             is ForgotPasswordEvent.OnClickButtonEvent -> forgotPassword()
         }
     }
@@ -75,9 +84,12 @@ class ForgotPasswordViewModel @Inject constructor(
                     validate()
 
                     state.contentState.internetIsAvailable.value =
-                        InternetUtils.isInternetAvailable(context)
+                        NetworkUtils.isInternetAvailable(context)
 
-                    if (state.contentState.internetIsAvailable.value) {
+                    state.contentState.serverIsAvailable.value =
+                        checkingServerAvailableUseCase.execute()
+
+                    if (state.contentState.internetIsAvailable.value && state.contentState.serverIsAvailable.value) {
                         if (state.emailIsValid) {
                             if (checkingEmailForRegistrationOperator.invoke(email = state.email)) {
 
