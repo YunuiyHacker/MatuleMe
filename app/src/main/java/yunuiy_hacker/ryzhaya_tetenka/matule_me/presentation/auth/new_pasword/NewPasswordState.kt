@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.state.ContentState
 
 class NewPasswordState {
-    var email by mutableStateOf("")
+    var email by mutableStateOf("alfirnurkaev7@gmail.com")
     var password by mutableStateOf("")
     var passwordConfirmation by mutableStateOf("")
 
@@ -18,6 +18,7 @@ class NewPasswordState {
 
     var message by mutableStateOf("")
     var showMessageDialog by mutableStateOf(false)
+    var showSuccessDialog by mutableStateOf(false)
 
     var contentState by mutableStateOf(ContentState())
 

@@ -17,6 +17,8 @@ import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.data.local.shared_prefs.SharedPrefsHelper
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.change_password.ChangePasswordUseCase
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.change_password.CheckingOTPCodeAccuracyUseCase
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.change_password.ResendOTPCodeUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.use_case.CheckingEmailForRegistrationOperator
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.forgot_password.SendRequestForTakeOTPCodeUseCase
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.sign_in.SignInUseCase
@@ -46,6 +48,11 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideCheckingEmailForRegistrationOperator(supabaseClient: SupabaseClient): CheckingEmailForRegistrationOperator =
+        CheckingEmailForRegistrationOperator(supabaseClient)
+
+    @Provides
+    @Singleton
     fun provideSignInUseCase(supabaseClient: SupabaseClient): SignInUseCase =
         SignInUseCase(supabaseClient)
 
@@ -64,6 +71,16 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideResendOTPCodeUseCase(supabaseClient: SupabaseClient): ResendOTPCodeUseCase =
+        ResendOTPCodeUseCase(supabaseClient)
+
+    @Provides
+    @Singleton
     fun provideChangePasswordUseCase(supabaseClient: SupabaseClient): ChangePasswordUseCase =
         ChangePasswordUseCase(supabaseClient)
+
+    @Provides
+    @Singleton
+    fun provideCheckingOTPCodeAccuracyUseCase(supabaseClient: SupabaseClient): CheckingOTPCodeAccuracyUseCase =
+        CheckingOTPCodeAccuracyUseCase(supabaseClient)
 }

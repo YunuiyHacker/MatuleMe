@@ -8,6 +8,8 @@ import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.state.Content
 class ForgotPasswordState {
     var email by mutableStateOf("")
 
+    var emailIsValid by mutableStateOf(false)
+
     var showCheckYourEmailDialog by mutableStateOf(false)
 
     var message by mutableStateOf("")

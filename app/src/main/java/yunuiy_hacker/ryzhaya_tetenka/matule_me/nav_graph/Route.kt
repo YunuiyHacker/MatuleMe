@@ -9,4 +9,10 @@ sealed class Route(val route: String) {
     data object OTPVerificationScreen : Route("otpVerificationScreen")
     data object NewPasswordScreen : Route("newPasswordScreen")
     data object HomeScreen : Route("homeScreen")
+
+    data object FavoriteScreen : Route("favoriteScreen")
+    data object CartScreen : Route("CartScreen")
+    data object NotificationScreen : Route("notificationScreen")
+    data object ProfileScreen : Route("profileScreen")
+
 }

@@ -39,9 +39,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.R
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.nav_graph.Route
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.LoadingDialog
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.LoadingDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.TextField
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.forgot_password.composable.CheckYourEmailDialog
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_up.SignUpEvent
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.InternetIsNotAvailableDialog
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.MessageDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.BlockBackgroundColor
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.MatuleMeTheme
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.raleway
@@ -133,6 +136,19 @@ fun ForgotPasswordScreen(
                         textAlign = TextAlign.Center
                     )
                 }
+            }
+
+            if (state.showMessageDialog) {
+                MessageDialog(
+                    onDismissRequest = { viewModel.onEvent(ForgotPasswordEvent.HideMessageDialogEvent) },
+                    message = state.message
+                )
+            }
+
+            if (!state.contentState.internetIsAvailable.value) {
+                InternetIsNotAvailableDialog(onDismissRequest = {
+                    viewModel.onEvent(ForgotPasswordEvent.HideInternetIsNotAvailableDialogEvent)
+                })
             }
 
             if (state.showCheckYourEmailDialog) {

@@ -9,19 +9,24 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.R
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.change_password.ChangePasswordUseCase
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.forgot_password.SendRequestForTakeOTPCodeUseCase
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.change_password.CheckingOTPCodeAccuracyUseCase
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.use_case.CheckingEmailForRegistrationOperator
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_up.SignUpEvent
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.Constants.SUCCESS_DIALOG_SHOW_TIME_IN_SECONDS
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.InternetUtils
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class NewPasswordViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val changePasswordUseCase: ChangePasswordUseCase
-) :
-    ViewModel() {
+    private val changePasswordUseCase: ChangePasswordUseCase,
+) : ViewModel() {
     val state by mutableStateOf(NewPasswordState())
 
     fun onEvent(event: NewPasswordEvent) {
@@ -52,6 +57,14 @@ class NewPasswordViewModel @Inject constructor(
                 state.message = ""
             }
 
+            is NewPasswordEvent.ShowInternetIsNotAvailableDialogEvent -> {
+                state.contentState.internetIsAvailable.value = false
+            }
+
+            is NewPasswordEvent.HideInternetIsNotAvailableDialogEvent -> {
+                state.contentState.internetIsAvailable.value = true
+            }
+
             is NewPasswordEvent.OnClickButtonEvent -> changePassword()
         }
     }
@@ -65,14 +78,31 @@ class NewPasswordViewModel @Inject constructor(
                 try {
                     validate()
 
-                    if (state.passwordIsValid && state.passwordConfirmationIsValid && state.password == state.passwordConfirmation) {
-                        changePasswordUseCase.execute(
-                            email = state.email,
-                            newPassword = state.password
-                        )
-                    } else {
-                        state.showMessageDialog = true
+                    state.contentState.internetIsAvailable.value =
+                        InternetUtils.isInternetAvailable(context)
+
+                    if (state.contentState.internetIsAvailable.value) {
+                        if (state.passwordIsValid && state.passwordConfirmationIsValid && state.password == state.passwordConfirmation) {
+                            val user = changePasswordUseCase.execute(
+                                email = state.email, newPassword = state.password
+                            )
+
+                            if (user != null) {
+                                state.showSuccessDialog = true
+                                delay(SUCCESS_DIALOG_SHOW_TIME_IN_SECONDS.seconds)
+                                state.showSuccessDialog = false
+
+                                state.success = true
+                            } else {
+                                state.message =
+                                    context.getString(R.string.could_not_set_a_new_password_for_user)
+                                state.showMessageDialog = true
+                            }
+                        } else {
+                            state.showMessageDialog = true
+                        }
                     }
+
                     state.contentState.isLoading.value = false
                 } catch (e: Exception) {
                     state.contentState.isLoading.value = false
@@ -94,7 +124,7 @@ class NewPasswordViewModel @Inject constructor(
             state.message =
                 context.getString(R.string.min_length_of_password_confirmation_is_8_symbols)
         } else state.passwordConfirmationIsValid = true
-        if (state.password == state.passwordConfirmation) {
+        if (state.password != state.passwordConfirmation) {
             state.message = context.getString(R.string.password_and_its_confirmation_must_match)
         }
     }

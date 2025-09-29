@@ -1,9 +1,9 @@
 package yunuiy_hacker.ryzhaya_tetenka.matule_me.utils
 
+import kotlin.time.Duration.Companion.seconds
+
 object Constants {
 
-    //OkHttpClient properties
-    const val READ_TIMEOUT = 10_000L
-    const val WRITE_TIMEOUT = 10_000L
-    const val CONNECT_TIMEOUT = 30_000L
+    const val OTP_CODE_RESEND_TIME_IN_SECONDS = 120
+    const val SUCCESS_DIALOG_SHOW_TIME_IN_SECONDS = 2
 }

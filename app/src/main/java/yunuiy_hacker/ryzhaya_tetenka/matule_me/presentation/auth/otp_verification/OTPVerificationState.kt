@@ -8,12 +8,16 @@ import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.state.Content
 class OTPVerificationState {
     var email by mutableStateOf("")
 
-    var receivedOTPCode by mutableStateOf("")
-    var userOTPCode by mutableStateOf("")
+    var OTPCodeIsValid by mutableStateOf(false)
+    var invalidOTPCode by mutableStateOf(false)
 
-    var time by mutableStateOf(30)
+    var time by mutableStateOf(0)
 
     var showCheckYourEmailDialog by mutableStateOf(false)
+
+    var message by mutableStateOf("")
+    var showMessageDialog by mutableStateOf(false)
+    var showSuccessDialog by mutableStateOf(false)
 
     var contentState by mutableStateOf(ContentState())
 

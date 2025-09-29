@@ -1,4 +1,4 @@
-package yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable
+package yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

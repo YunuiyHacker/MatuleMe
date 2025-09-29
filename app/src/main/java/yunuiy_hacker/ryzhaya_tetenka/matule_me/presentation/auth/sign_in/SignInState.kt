@@ -16,6 +16,7 @@ class SignInState {
 
     var message by mutableStateOf("")
     var showMessageDialog by mutableStateOf(false)
+    var showSuccessDialog by mutableStateOf(false)
 
     var contentState by mutableStateOf(ContentState())
 

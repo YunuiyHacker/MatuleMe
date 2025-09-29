@@ -1,5 +1,6 @@
 package yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.new_pasword
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -42,9 +43,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.R
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.nav_graph.Route
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.LoadingDialog
-import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.MessageDialog
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_up.SignUpEvent
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.LoadingDialog
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.MessageDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.TextField
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.InternetIsNotAvailableDialog
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.common.composable.dialogs.SuccessDialog
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.BlockBackgroundColor
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.HintColor
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.ui.theme.MatuleMeTheme
@@ -69,7 +73,7 @@ fun NewPasswordScreen(
                             .background(color = BlockBackgroundColor)
                             .clickable {
                                 navHostController.popBackStack(
-                                    Route.SignInScreen.route, inclusive = false
+                                    Route.OTPVerificationScreen.route, inclusive = false
                                 )
                             }) {
                         Icon(
@@ -147,9 +151,9 @@ fun NewPasswordScreen(
                 Spacer(modifier = Modifier.height(30.dp))
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = state.password,
+                    value = state.passwordConfirmation,
                     onValueChange = {
-                        viewModel.onEvent(NewPasswordEvent.ChangePasswordEvent(it))
+                        viewModel.onEvent(NewPasswordEvent.ChangePasswordConfirmationEvent(it))
                     },
                     label = stringResource(R.string.password_confirmation),
                     placeholder = "********",
@@ -208,6 +212,16 @@ fun NewPasswordScreen(
                 )
             }
 
+            if (state.showSuccessDialog) {
+                SuccessDialog(onDismissRequest = {})
+            }
+
+            if (!state.contentState.internetIsAvailable.value) {
+                InternetIsNotAvailableDialog(onDismissRequest = {
+                    viewModel.onEvent(NewPasswordEvent.HideInternetIsNotAvailableDialogEvent)
+                })
+            }
+
             if (state.contentState.isLoading.value) {
                 LoadingDialog(onDismissRequest = {})
             }
@@ -215,6 +229,10 @@ fun NewPasswordScreen(
 
         LaunchedEffect(state.success) {
             if (state.success) navHostController.navigate(Route.SignInScreen.route)
+        }
+
+        BackHandler {
+            navHostController.popBackStack(Route.OTPVerificationScreen.route, inclusive = false)
         }
     }
 }

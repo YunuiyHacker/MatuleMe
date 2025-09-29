@@ -5,5 +5,5 @@ import androidx.compose.runtime.mutableStateOf
 
 data class ContentState(
     val isLoading: MutableState<Boolean> = mutableStateOf(false),
-    val internetIsAvailable: MutableState<Boolean> = mutableStateOf(false)
+    val internetIsAvailable: MutableState<Boolean> = mutableStateOf(true)
 )

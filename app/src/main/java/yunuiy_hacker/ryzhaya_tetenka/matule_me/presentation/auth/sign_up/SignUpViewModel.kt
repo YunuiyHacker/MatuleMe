@@ -9,14 +9,19 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.R
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.data.common.model.User
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.data.local.shared_prefs.SharedPrefsHelper
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.sign_up.SignUpUseCase
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_in.SignInEvent
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.Constants.SUCCESS_DIALOG_SHOW_TIME_IN_SECONDS
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.InternetUtils
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.RegexPatterns.PATTERN_EMAIL
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
@@ -58,6 +63,14 @@ class SignUpViewModel @Inject constructor(
                 state.message = ""
             }
 
+            is SignUpEvent.ShowInternetIsNotAvailableDialogEvent -> {
+                state.contentState.internetIsAvailable.value = false
+            }
+
+            is SignUpEvent.HideInternetIsNotAvailableDialogEvent -> {
+                state.contentState.internetIsAvailable.value = true
+            }
+
             is SignUpEvent.OnClickButtonEvent -> signUp()
         }
     }
@@ -71,34 +84,43 @@ class SignUpViewModel @Inject constructor(
                 try {
                     validate()
 
-                    if (state.nameIsValid && state.emailIsValid && state.passwordIsValid && state.privacyPolicyIsConfirmed) {
-                        if (signUpUseCase.checkingEmailForRegistrationOperator(state.email)) {
-                            state.message =
-                                context.getString(R.string.user_with_such_an_email_address_is_already_registered_in_the_system)
-                            state.showMessageDialog = true
-                        } else {
-                            val user = signUpUseCase.createNewUserOperator(
-                                User(
-                                    name = state.name,
-                                    email = state.email,
-                                    password = state.password
-                                )
-                            )
+                    state.contentState.internetIsAvailable.value =
+                        InternetUtils.isInternetAvailable(context)
 
-                            if (user != null) {
-                                sharedPrefsHelper.userId = user.id
-                                sharedPrefsHelper.userName = user.name
-                                sharedPrefsHelper.userSurname = user.surname
-
-                                state.success = true
-                            } else {
+                    if (state.contentState.internetIsAvailable.value) {
+                        if (state.nameIsValid && state.emailIsValid && state.passwordIsValid && state.privacyPolicyIsConfirmed) {
+                            if (signUpUseCase.checkingEmailForRegistrationOperator(state.email)) {
                                 state.message =
-                                    context.getString(R.string.an_unknown_error_occurred_during_the_operation)
+                                    context.getString(R.string.user_with_such_an_email_address_is_already_registered_in_the_system)
                                 state.showMessageDialog = true
+                            } else {
+                                val user = signUpUseCase.createNewUserOperator(
+                                    User(
+                                        name = state.name,
+                                        email = state.email,
+                                        password = state.password
+                                    )
+                                )
+
+                                if (user != null) {
+                                    sharedPrefsHelper.userId = user.id
+                                    sharedPrefsHelper.userName = user.name
+                                    sharedPrefsHelper.userSurname = user.surname
+
+                                    state.showSuccessDialog = true
+                                    delay(SUCCESS_DIALOG_SHOW_TIME_IN_SECONDS.seconds)
+                                    state.showSuccessDialog = false
+
+                                    state.success = true
+                                } else {
+                                    state.message =
+                                        context.getString(R.string.an_unknown_error_occurred_during_the_operation)
+                                    state.showMessageDialog = true
+                                }
                             }
+                        } else {
+                            state.showMessageDialog = true
                         }
-                    } else {
-                        state.showMessageDialog = true
                     }
 
                     state.contentState.isLoading.value = false

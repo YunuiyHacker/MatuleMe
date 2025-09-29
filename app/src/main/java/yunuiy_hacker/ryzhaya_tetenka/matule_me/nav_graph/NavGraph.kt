@@ -18,6 +18,7 @@ import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.otp_verificatio
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_in.SignInScreen
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_up.SignUpScreen
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.auth.sign_up.pdf.PdfViewerScreen
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.presentation.main.profile.ProfileScreen
 
 @Composable
 fun NavGraph(navHostController: NavHostController, startDestination: String) {
@@ -39,10 +40,11 @@ fun NavGraph(navHostController: NavHostController, startDestination: String) {
         }
         composable(
             route = "${Route.OTPVerificationScreen.route}/{email}", arguments = listOf(
-            navArgument("email") {
-                NavType.StringType
-                nullable = false
-            })) {
+                navArgument("email") {
+                    NavType.StringType
+                    nullable = false
+                })
+        ) {
             val email = it.arguments?.getString("email").toString()
 
             val viewModel: OTPVerificationViewModel = hiltViewModel()
@@ -52,10 +54,11 @@ fun NavGraph(navHostController: NavHostController, startDestination: String) {
         }
         composable(
             route = "${Route.NewPasswordScreen.route}/{email}", arguments = listOf(
-            navArgument("email") {
-                NavType.StringType
-                nullable = false
-            })) {
+                navArgument("email") {
+                    NavType.StringType
+                    nullable = false
+                })
+        ) {
             val email = it.arguments?.getString("email").toString()
 
             val viewModel: NewPasswordViewModel = hiltViewModel()
@@ -63,8 +66,22 @@ fun NavGraph(navHostController: NavHostController, startDestination: String) {
 
             NewPasswordScreen(navHostController = navHostController, viewModel = viewModel)
         }
+
+        composable(route = Route.NewPasswordScreen.route) {
+            NewPasswordScreen(navHostController = navHostController)
+        }
+
+        //Main screens
         composable(route = Route.HomeScreen.route) {
             HomeScreen(navHostController = navHostController)
+        }
+        composable(route = Route.FavoriteScreen.route) {
+
+        }
+        composable(route = Route.NotificationScreen.route) {
+        }
+        composable(route = Route.ProfileScreen.route) {
+            ProfileScreen(navHostController = navHostController)
         }
     }
 }

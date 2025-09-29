@@ -8,5 +8,8 @@ sealed class SignInEvent {
     data class ShowMessageDialogEvent(val message: String?) : SignInEvent()
     data object HideMessageDialogEvent : SignInEvent()
 
+    data object ShowInternetIsNotAvailableDialogEvent : SignInEvent()
+    data object HideInternetIsNotAvailableDialogEvent : SignInEvent()
+
     data object OnClickButtonEvent : SignInEvent()
 }

@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.R
@@ -16,8 +17,11 @@ import yunuiy_hacker.ryzhaya_tetenka.matule_me.data.common.model.User
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.data.local.shared_prefs.SharedPrefsHelper
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.common.mappers.toDomain
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.domain.sign_in.SignInUseCase
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.Constants.SUCCESS_DIALOG_SHOW_TIME_IN_SECONDS
+import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.InternetUtils
 import yunuiy_hacker.ryzhaya_tetenka.matule_me.utils.RegexPatterns.PATTERN_EMAIL
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
@@ -51,6 +55,14 @@ class SignInViewModel @Inject constructor(
                 state.message = ""
             }
 
+            is SignInEvent.ShowInternetIsNotAvailableDialogEvent -> {
+                state.contentState.internetIsAvailable.value = false
+            }
+
+            is SignInEvent.HideInternetIsNotAvailableDialogEvent -> {
+                state.contentState.internetIsAvailable.value = true
+            }
+
             is SignInEvent.OnClickButtonEvent -> signIn()
         }
     }
@@ -64,34 +76,44 @@ class SignInViewModel @Inject constructor(
                 try {
                     validate()
 
-                    if (state.emailIsValid && state.passwordIsValid) {
-                        val user = signInUseCase.execute(
-                            User(
-                                email = state.email, password = state.password
-                            )
-                        )?.toDomain()
+                    state.contentState.internetIsAvailable.value =
+                        InternetUtils.isInternetAvailable(context)
 
-                        if (user != null) {
-                            sharedPrefsHelper.userId = user.id
-                            sharedPrefsHelper.userName = user.name
-                            sharedPrefsHelper.userSurname = user.surname
+                    if (state.contentState.internetIsAvailable.value) {
+                        if (state.emailIsValid && state.passwordIsValid) {
+                            val user = signInUseCase.execute(
+                                User(
+                                    email = state.email, password = state.password
+                                )
+                            )?.toDomain()
 
-                            state.success = true
+                            if (user != null) {
+                                sharedPrefsHelper.userId = user.id
+                                sharedPrefsHelper.userName = user.name
+                                sharedPrefsHelper.userSurname = user.surname
+
+                                state.showSuccessDialog = true
+                                delay(SUCCESS_DIALOG_SHOW_TIME_IN_SECONDS.seconds)
+                                state.showSuccessDialog = false
+
+                                state.success = true
+                            } else {
+                                state.message =
+                                    context.getString(R.string.in_system_not_user_with_this_credits)
+                                state.showMessageDialog = true
+                            }
+
                         } else {
-                            state.message =
-                                context.getString(R.string.in_system_not_user_with_this_credits)
                             state.showMessageDialog = true
                         }
-
-                    } else {
-                        state.showMessageDialog = true
                     }
 
                     state.contentState.isLoading.value = false
                 } catch (e: Exception) {
                     state.contentState.isLoading.value = false
 
-                    state.message = context.getString(R.string.an_unknown_error_occurred_during_the_operation)
+                    state.message =
+                        context.getString(R.string.an_unknown_error_occurred_during_the_operation)
                     state.showMessageDialog = true
                 }
             }

@@ -11,5 +11,8 @@ sealed class NewPasswordEvent {
     data class ShowMessageDialogEvent(val message: String?) : NewPasswordEvent()
     data object HideMessageDialogEvent : NewPasswordEvent()
 
+    data object ShowInternetIsNotAvailableDialogEvent : NewPasswordEvent()
+    data object HideInternetIsNotAvailableDialogEvent : NewPasswordEvent()
+
     data object OnClickButtonEvent : NewPasswordEvent()
 }
